@@ -281,3 +281,92 @@ class Solution:
         return str(key[0]) + ":" + str(key[1]) + ":" + str(key[2])
 
 ```
+
+## 7. Reverse Integers
+### Description
+給定一帶有符32-bit整數x, 回傳反轉後的數字, 若反轉導致值超出有符32-bit整數的範圍則回傳0 (不允許存值至有/無符64-bit整數)
+### Examples
+Input: x = -123
+
+Output: -321
+
+Input: x = 120
+
+Output: 21
+
+### Solutions
+#### 1.
+將值轉成字串，再利用python的index反轉得到相反結果，再轉回int回傳 (記得判斷範圍)
+
+補數原理: https://noob.tw/complements/
+```python=
+class Solution:
+    def reverse(self, x: int) -> int:
+        
+        if x == 0:
+            return 0
+        # 判斷x的正負
+        if x > 0:
+            rev = str(x)[::-1]  #若為正值，則直接轉為字串並反轉
+        # if x is negative, turn it to a positive and prepend '-' sign
+        else:
+            rev = '-' + str(x * -1)[::-1] #若為負值，則將x轉為正值再轉為字串並反轉 (負值直接轉的話會變成ex: (-123)→(321-) )，轉完再將負號字串加回去
+            
+        rev = int(rev) #轉回int以利判斷正負，同時題目也要求返回int值
+        
+        if rev > 0:
+            tmp = rev & 0x7fffffff #利用bit判斷 ，32-bit signed int的最大值為0x7fffffff，這邊用&將兩數值逐bit相乘，若乘出來值不變(也就是後面31-bit都相同且signed bit沒被rev值改變)，則代表在值域內
+            if tmp == rev:
+                return rev
+            else:
+                return 0
+        elif rev < 0:
+            tmp = rev & -0x80000000 #利用bit判斷 ，32-bit signed int的最小值為-0x80000000，這邊用&將兩數值逐bit相乘，若乘出來值為最小值(也就是結果僅留下最前面的signed bit)，則代表在值域內
+            if tmp == -0x80000000:
+                return rev
+            else:
+                return 0
+
+```
+## 27. Remove Element
+### Description
+給定一整數數列及整數val，移除數列中所有val值，順序不必保留，但須in-place操作(不得另開數列儲存)，回傳結果數列的長度
+### Solutions
+#### 1.
+使用python3的list操作  
+nums.remove(val) : 移除數列中第一個找到的val值
+nums.count(val) : 回傳數列中val的個數
+
+```python=
+class Solution:
+    def removeElement(self, nums: List[int], val: int) -> int:
+	#執行迴圈直到list中沒有val元素
+        while(nums.count(val)):
+            nums.remove(val)
+        return (len(nums))
+```
+#### 2.
+宣告指標start，主要用來記錄可以被替換的位置，在每次檢測到保留值的時候把保留值替換過去
+```python=
+class Solution:
+    def removeElement(self, nums: List[int], val: int) -> int:
+        _len = len(nums)
+        startIdx = -1
+        endIdx = -1
+        k=0 #用來記錄結果的長度
+        for i in range(_len):
+	#檢查是否等於val
+            if (nums[i] == val):
+                if (startIdx== -1 ):#檢查到startidx仍為起始狀態，也就是偵測到第一個val值的狀況
+#更新start
+                    startIdx = i
+                continue
+            else:
+                k = k + 1 #若非val，則回傳的k++
+                if ( startIdx >= 0 ):#若已有值被檢測到
+                    nums[startIdx]=nums[i]#用後面的保留值取代前面的val值
+                    startIdx = startIdx + 1 #因為已取代，start此時為欲保留值，而將start以及end+1 
+                
+        return k
+
+```
